@@ -92,6 +92,7 @@ def main():
         report['independent_windows_ci'] = {
             'run_id': os.environ['GITHUB_RUN_ID'], 'commit': os.environ['GITHUB_SHA'],
             'runner_os': os.environ['RUNNER_OS'], 'cpu_fallback': True,
+            'verified_github_actions': os.environ.get('GITHUB_ACTIONS') == 'true',
         }
         (output / 'reports/upgrade.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
         success = True
