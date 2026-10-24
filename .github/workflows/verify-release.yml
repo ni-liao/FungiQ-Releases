@@ -11,6 +11,11 @@ on:
         description: Previously published base version
         required: true
         default: '1.0.9'
+      source:
+        description: Test draft files or the anonymous public GitHub updater
+        type: choice
+        options: [draft, public]
+        default: draft
 
 permissions:
   contents: read
@@ -51,6 +56,7 @@ jobs:
           --from-version '${{ inputs.from_version }}'
           --edition '${{ matrix.edition }}'
           --mode '${{ matrix.mode }}'
+          --source '${{ inputs.source }}'
       - name: Preserve evidence even if verification fails
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

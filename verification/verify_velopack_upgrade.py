@@ -97,7 +97,9 @@ def download_and_schedule(args, output):
     current, packages = root / "current", root / "packages"
     locator = velopack.VelopackLocatorConfig(root, root / "Update.exe", packages,
                                            current / "sq.version", current, True)
-    manager = velopack.UpdateManager(velopack.HttpSource(args.stage_source),
+    source = (velopack.GithubSource(args.github_source) if args.github_source
+              else velopack.HttpSource(args.stage_source))
+    manager = velopack.UpdateManager(source,
                                      velopack.UpdateOptions(False, 10, args.edition.lower()), locator)
     if manager.get_current_version() != args.from_version:
         raise RuntimeError("Isolated installation has the wrong base version")
@@ -133,6 +135,7 @@ def main():
     parser.add_argument("--feed", type=Path)
     parser.add_argument("--full", action="store_true")
     parser.add_argument("--stage-source")
+    parser.add_argument("--github-source")
     parser.add_argument("--trim-test-cache", action="store_true")
     args = parser.parse_args()
     workspace = Path(__file__).resolve().parents[1]
@@ -190,6 +193,8 @@ def main():
             command.append("--full")
         if args.trim_test_cache:
             command.append("--trim-test-cache")
+        if args.github_source:
+            command += ["--github-source", args.github_source]
         subprocess.run(command, cwd=reports, env=clean_environment(), timeout=300, check=True)
     finally:
         server.shutdown()
@@ -197,7 +202,7 @@ def main():
         thread.join()
     requested_packages = [path.rsplit("/", 1)[-1] for path in server.requests if path.endswith(".nupkg")]
     expected_request = target.name if args.full else target.name.replace("-full.nupkg", "-delta.nupkg")
-    if not requested_packages or set(requested_packages) != {expected_request}:
+    if not args.github_source and (not requested_packages or set(requested_packages) != {expected_request}):
         raise RuntimeError(f"Wrong package download path: {requested_packages}")
     candidates = list(packages.glob(f"*{args.to_version}*full.nupkg"))
     if len(candidates) != 1:
@@ -222,6 +227,7 @@ def main():
              "reconstructed_package_contents_match": True, "verified_app_files": verified,
              "real_update_exe_apply_and_restart": True, "startup": after,
              "shell_registration_isolated": True, "test_root": str(root),
+             "public_github_source": args.github_source,
              "elapsed_seconds": round(time.perf_counter() - started, 2)}
     (reports / "upgrade.json").write_text(json.dumps(value, indent=2), encoding="utf-8")
     print(json.dumps(value, indent=2), flush=True)

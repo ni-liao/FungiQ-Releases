@@ -55,6 +55,7 @@ def main():
     parser.add_argument('--from-version', required=True, type=checked_version)
     parser.add_argument('--edition', required=True, choices=('CPU', 'GPU'))
     parser.add_argument('--mode', required=True, choices=('delta', 'full'))
+    parser.add_argument('--source', choices=('draft', 'public'), default='draft')
     args = parser.parse_args()
     repository = os.environ['GITHUB_REPOSITORY']
     temp = Path(os.environ['RUNNER_TEMP']).resolve()
@@ -97,6 +98,8 @@ def main():
                    '--trim-test-cache']
         if args.mode == 'full':
             command.append('--full')
+        if args.source == 'public':
+            command += ['--github-source', f'https://github.com/{repository}']
         with (evidence / 'verification.log').open('w', encoding='utf-8') as log:
             result = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, timeout=1200)
         print((evidence / 'verification.log').read_text(encoding='utf-8', errors='replace'), flush=True)
