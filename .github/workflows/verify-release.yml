@@ -24,6 +24,9 @@ jobs:
     name: ${{ matrix.edition }} ${{ matrix.mode }} upgrade
     runs-on: windows-2022
     timeout-minutes: 30
+    permissions:
+      # Draft assets require repository push access; no publishing command is run.
+      contents: write
     strategy:
       fail-fast: false
       matrix:

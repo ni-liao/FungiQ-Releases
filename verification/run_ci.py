@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 import traceback
 
 
@@ -30,6 +31,22 @@ def verify_file(path, expected):
     if path.stat().st_size != expected['size'] or digest != expected['sha256']:
         raise RuntimeError(f'Release asset differs from the build manifest: {path.name}')
     print(f'Verified SHA256: {path.name} {digest}', flush=True)
+
+
+def wait_draft_assets(repository, version, names):
+    deadline = time.monotonic() + 900
+    while time.monotonic() < deadline:
+        data = json.loads(subprocess.check_output([
+            'gh', 'release', 'view', f'v{version}', '--repo', repository,
+            '--json', 'assets',
+        ], encoding='utf-8'))
+        ready = {a['name'] for a in data['assets'] if a['state'] == 'uploaded'}
+        missing = sorted(set(names) - ready)
+        if not missing:
+            return
+        print('Waiting for draft uploads:', ', '.join(missing), flush=True)
+        time.sleep(20)
+    raise TimeoutError('Draft release assets were not fully uploaded')
 
 
 def main():
@@ -67,6 +84,7 @@ def main():
                           'free_gib': round(shutil.disk_usage(work).free / 2**30, 2)}), flush=True)
         run('gh', 'release', 'download', f'v{args.from_version}', '--repo', repository,
             '--pattern', base_name, '--dir', feed)
+        wait_draft_assets(repository, args.version, target_names + [f'releases.{channel}.json'])
         run('gh', 'release', 'download', f'v{args.version}', '--repo', repository,
             '--pattern', target_names[0], '--pattern', target_names[1],
             '--pattern', f'releases.{channel}.json', '--dir', feed)
