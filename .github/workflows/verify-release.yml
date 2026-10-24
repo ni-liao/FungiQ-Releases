@@ -1,0 +1,58 @@
+name: Verify Release Updates
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Draft release version
+        required: true
+        default: '1.1.0'
+      from_version:
+        description: Previously published base version
+        required: true
+        default: '1.0.9'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-verification-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  upgrade:
+    name: ${{ matrix.edition }} ${{ matrix.mode }} upgrade
+    runs-on: windows-2022
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        edition: [CPU, GPU]
+        mode: [delta, full]
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CUDA_VISIBLE_DEVICES: '-1'
+      QT_OPENGL: software
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.11'
+      - name: Install verification dependency
+        run: python -m pip install --disable-pip-version-check velopack==1.2.0
+      - name: Download, apply and restart the real release
+        run: >-
+          python verification/run_ci.py
+          --version '${{ inputs.version }}'
+          --from-version '${{ inputs.from_version }}'
+          --edition '${{ matrix.edition }}'
+          --mode '${{ matrix.mode }}'
+      - name: Preserve evidence even if verification fails
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-verification-${{ matrix.edition }}-${{ matrix.mode }}
+          path: ${{ runner.temp }}/fungiq-ci-output
+          if-no-files-found: error
+          retention-days: 14
