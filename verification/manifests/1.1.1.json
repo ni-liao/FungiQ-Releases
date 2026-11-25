@@ -1,0 +1,44 @@
+{
+  "version": "1.1.1",
+  "from_version": "1.1.0",
+  "assets": {
+    "FungiQ.CPU-1.1.1-cpu-full.nupkg": {
+      "sha256": "827707498e8d84d1b50d0e2ae3a18f5dd279ae0cbd4fc230146bde1b52ce2026",
+      "size": 328300232
+    },
+    "FungiQ.CPU-1.1.1-cpu-delta.nupkg": {
+      "sha256": "9c2a83a7290b2c98ba82223460d08a1fb06f7bc0c4666bced7865dc5cb7e72e7",
+      "size": 4926798
+    },
+    "FungiQ.CPU-cpu-Setup.exe": {
+      "sha256": "9737d75e39e1366549f4b511642e2e3e230a6161b750ed7d67a8d1eb4d4bf523",
+      "size": 332927688
+    },
+    "FungiQ.GPU-1.1.1-gpu-full.nupkg": {
+      "sha256": "89942caff20e8e9ca3e601957242701e3ce324a9ced40f7564c1bb5cc6449664",
+      "size": 2138345674
+    },
+    "FungiQ.GPU-1.1.1-gpu-delta.nupkg": {
+      "sha256": "377b62d6d4dfe47fbd030b7ca63ee4b377e44cd32a9e6774f9d2f3c65e729c20",
+      "size": 9928803
+    },
+    "FungiQ.GPU-gpu-Setup.exe": {
+      "sha256": "e28cba9431d924d7dfc268e66add662ce573824835d47567d586f6ccea07cbaf",
+      "size": 2142973130
+    },
+    "FungiQ-1.1.1-OnlineSetup.exe": {
+      "sha256": "c7dd82ec88e70e8f5fd5d8e01561d75051a8a464ed9048e0a85b2846fa5311c0",
+      "size": 2206513
+    }
+  },
+  "base_assets": {
+    "FungiQ.CPU-1.1.0-cpu-full.nupkg": {
+      "sha256": "d92467c497ced4f275fe4273cad989958f4f795cc52ca3a54d14df13fb8960c5",
+      "size": 325238223
+    },
+    "FungiQ.GPU-1.1.0-gpu-full.nupkg": {
+      "sha256": "a0df02a81fa77c1205a31290b4335830149cca6c168fc055d5992ab45964872a",
+      "size": 2130292503
+    }
+  }
+}
